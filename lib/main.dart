@@ -47,42 +47,51 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int _counter = 0;
-  // AnimationController controller;
-  // Animation flipAnim;
+  late AnimationController _controller;
+  late Animation flipAnim;
+  late Image coinFront;
+  late Image coinBack;
+  bool showFront = true;
 
   @override
   void initState() {
     super.initState();
-    // controller = AnimationController(vsync: this, duration: Duration(seconds: 5));
-    // flipAnim = Tween(begin: 0, end: 1).animate(CurvedAnimation(
-    //   parent: controller,
-    //   curve: Interval(0.0, 0.5, curve: Curves.linear)
-    // ));
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300), value: 0);
+    // _controller.repeat(reverse: true);
+    flipAnim = Tween(begin: 0, end: 1).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Interval(0.0, 0.5, curve: Curves.linear)
+    ));
+    coinFront = Image.asset('sello.png');
+    coinBack = Image.asset('aguila.png');
   }
 
-  void _incrementCounter() {
+  void _incrementCounter() async {
+    Random rand = new Random();
+    int randomNumber = rand.nextInt(2);
+    await _controller.forward();
     setState(() {
-      // _counter++;
-      Random rand = new Random();
-      int randomNumber = rand.nextInt(2);
       _counter = randomNumber;
+      showFront = !showFront;
     });
+    await _controller.reverse();
+    await _controller.forward();
+    setState(() {
+      if (randomNumber == 1) {
+        showFront = true;
+      } else {
+        showFront = false;
+      }
+    });
+    await _controller.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
@@ -105,29 +114,18 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Icon(Icons.ac_unit),
-            _counter == 0
-              ? Image(image: AssetImage('aguila.png'), height: 80, width: 80,)
-              : Image(image: AssetImage('sello.png'), height: 80, width: 80,),
-              
-            Text(
-              'You have pushed the buttons this many times:',
-            ),
-            /*AnimatedBuilder(
-              animation: controller,
-              builder: (context, Widget child) {
-                return Center(
-                  child: InkWell(
-                  onTap: () {
-                    controller.repeat();
-                  },
-                  child: Transform(
-                    transform: Matrix4.identity()..rotateX(2 * pi * flipAnim.value),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Transform(
+                    transform: Matrix4.rotationY(_controller.value * pi / 2),
                     alignment: Alignment.center,
-                    child: Image(image: AssetImage('aguila.png'), height: 80, width: 80,),
-                    ),
-                ));
-              }),*/
+                    child: Image(
+                      image: showFront ? coinFront.image : coinBack.image, 
+                      height: 80, 
+                      width: 80,),
+                  );
+              }),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
