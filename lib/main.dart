@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Aguila o Sello'),
     );
   }
 }
@@ -48,7 +48,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  int _counter = 0;
+  // int _counter = 0;
   late AnimationController _controller;
   late Animation flipAnim;
   late Image coinFront;
@@ -58,14 +58,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300), value: 0);
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 250), value: 0);
     // _controller.repeat(reverse: true);
     flipAnim = Tween(begin: 0, end: 1).animate(CurvedAnimation(
       parent: _controller,
       curve: Interval(0.0, 0.5, curve: Curves.linear)
     ));
-    coinFront = Image.asset('sello.png');
-    coinBack = Image.asset('aguila.png');
+    coinFront = Image.asset('assets/sello.png');
+    coinBack = Image.asset('assets/aguila.png');
   }
 
   void _incrementCounter() async {
@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     int randomNumber = rand.nextInt(2);
     await _controller.forward();
     setState(() {
-      _counter = randomNumber;
+      // _counter = randomNumber;
       showFront = !showFront;
     });
     await _controller.reverse();
@@ -117,27 +117,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
-                return Transform(
-                    transform: Matrix4.rotationY(_controller.value * pi / 2),
-                    alignment: Alignment.center,
-                    child: Image(
-                      image: showFront ? coinFront.image : coinBack.image, 
-                      height: 80, 
-                      width: 80,),
-                  );
+                return Theme(
+                  data: ThemeData(splashColor: Colors.transparent, highlightColor: Colors.transparent),
+                  child: InkWell(
+                      // splashColor: Colors.transparent,
+                      // focusColor: Colors.transparent,
+                      child: Transform(
+                        transform: Matrix4.rotationY(_controller.value * pi / 2),
+                        alignment: Alignment.center,
+                        child: Image(
+                          image: showFront ? coinFront.image : coinBack.image, 
+                          height: 120, 
+                          width: 120,),
+                      ),
+                      onTap: _incrementCounter,
+                    ),
+                );
               }),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            // Text(
+            //   '$_counter',
+            //   style: Theme.of(context).textTheme.headline4,
+            // ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      /* floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ), */ // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
